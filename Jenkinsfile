@@ -1,11 +1,12 @@
 pipeline {
-    agent {
-        docker { image 'python:3.11-slim' }
-    }
+    agent any
+
     stages {
         stage('Install dependencies') {
             steps {
                 sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
@@ -14,7 +15,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml'
+                sh '''
+                    . venv/bin/activate
+                    pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
+                '''
             }
         }
 
