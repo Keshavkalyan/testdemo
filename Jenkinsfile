@@ -1,12 +1,11 @@
 pipeline {
-    agent any
-
+    agent {
+        docker { image 'python:3.11-slim' }
+    }
     stages {
         stage('Install dependencies') {
             steps {
                 sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
@@ -15,10 +14,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
-                '''
+                sh 'pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml'
             }
         }
 
@@ -30,6 +26,6 @@ pipeline {
     }
 
     triggers {
-        pollSCM('* * * * *')  // every 1 min check repo
+        pollSCM('* * * * *')
     }
 }
