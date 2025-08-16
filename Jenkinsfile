@@ -4,19 +4,27 @@ pipeline {
     stages {
         stage('Install dependencies') {
             steps {
-                sh 'pip3 install -r requirements.txt'
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'pytest --maxfail=1 --disable-warnings -q'
+                sh '''
+                    . venv/bin/activate
+                    pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
+                '''
             }
         }
 
         stage('Archive Results') {
             steps {
-                junit '**/test-results.xml'
+                junit 'test-results.xml'
             }
         }
     }
@@ -25,4 +33,3 @@ pipeline {
         pollSCM('* * * * *')  // every 1 min check repo
     }
 }
-
